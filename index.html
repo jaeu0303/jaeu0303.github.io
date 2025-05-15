@@ -1,277 +1,235 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bionic Hand Project</title>
+  <title>Bionic Hand 프로젝트</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f9f9f9;
+      background-color: #f4f6f8;
+      color: #333;
     }
+
     header {
-      background-color: #2c3e50;
+      background-color: #006666;
       color: white;
-      padding: 20px;
+      padding: 2rem;
       text-align: center;
     }
-    main {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 20px;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background-color: white;
       border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
+
     h2 {
-      color: #2c3e50;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.3rem;
     }
+
+    ul {
+      padding-left: 1.5rem;
+    }
+
     pre {
-      background: #f0f0f0;
-      padding: 15px;
+      background-color: #f4f4f4;
+      padding: 1rem;
       overflow-x: auto;
       border-radius: 5px;
     }
-    textarea, input[type="text"] {
+
+    .comment-form {
+      margin-top: 1rem;
+    }
+
+    .comment-form input,
+    .comment-form textarea {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      box-sizing: border-box;
-    }
-    .comment {
-      border-top: 1px solid #ddd;
-      padding: 10px 0;
-    }
-    .reply {
-      margin-left: 20px;
-      border-left: 2px solid #eee;
-      padding-left: 10px;
-    }
-    .comment img, .comment video {
-      max-width: 100%;
-      margin-top: 5px;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
       border-radius: 5px;
+      border: 1px solid #ccc;
     }
-    button {
-      background: #2980b9;
+
+    .comment-form button {
+      background-color: #006666;
       color: white;
-      padding: 10px 15px;
+      padding: 0.5rem 1rem;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-    button:hover {
-      background: #3498db;
+
+    .comment-list {
+      margin-top: 1rem;
+    }
+
+    .comment-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .reply-box {
+      margin-left: 1rem;
+    }
+
+    .reply-button,
+    .delete-button {
+      font-size: 0.9rem;
+      color: #006666;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 0.3rem;
+    }
+
+    a {
+      color: #006666;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+
   <header>
-    <h1>Bionic Hand Project</h1>
-    <p><a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" style="color: #ecf0f1; text-decoration: underline;">📎 PPT 링크</a></p>
+    <h1>Bionic Hand 프로젝트</h1>
+    <p>MYOWARE 2.0을 이용한 엄지 근전도 제어 의수</p>
   </header>
-  <main>
-    <section>
-      <h2>🔧 Arduino Code</h2>
-      <pre><code>#include &lt;Servo.h&gt;
 
-Servo myServo;
+  <div class="container">
+    <h2>프로젝트 소개</h2>
+    <p>
+      본 프로젝트는 MYOWARE 2.0 근전도 센서를 이용해 손가락(특히 엄지)의 움직임을 감지하여 인공 손을 제어하는 시스템입니다.
+      고등학교 동아리 활동으로 진행되었으며, 아두이노를 활용한 프로그래밍과 하드웨어 제어를 통해 제작하였습니다.
+    </p>
 
-const int sensorPin = A0;
-const int averageSampleSize = 10;
-int sensorReadings[averageSampleSize];
-int index = 0;
-long total = 0;
+    <p><a href="https://your-ppt-link.com" target="_blank">📎 발표 자료(PPT) 보기</a></p>
 
-long threshold = 0;
-const int hysteresis = 5;
-const int thresholdOffset = 15;
+    <h2>분석 포인트</h2>
+    <ul>
+      <li><strong>Author Credibility:</strong> 직접 제작 및 검증한 프로젝트로, 센서 매뉴얼과 데이터시트 참조</li>
+      <li><strong>Validity:</strong> 손가락 움직임 측정 정확도 및 반응성 확인</li>
+      <li><strong>Accuracy:</strong> 다양한 조건에서의 반복 측정 실험으로 신뢰도 확보</li>
+      <li><strong>Relevancy:</strong> 근전도 기반 제어는 실제 의수 기술에서도 활용되는 최신 기술</li>
+    </ul>
 
-bool isActivated = false;
-int lastServoPosition = 0;
-unsigned long lastToggleTime = 0;
-const unsigned long debounceTime = 500;
+    <h2>예시 코드 (Arduino)</h2>
+    <pre><code>// MYOWARE 2.0을 이용한 엄지 감지 예시 코드
+int emgPin = A0;
+int threshold = 500;
 
 void setup() {
-  myServo.attach(9);
   Serial.begin(9600);
-  myServo.write(0);
-  delay(1000);
-
-  for (int i = 0; i &lt; averageSampleSize; i++) {
-    sensorReadings[i] = 0;
-  }
-
-  Serial.println("Pre-filling readings buffer...");
-  for (int i = 0; i &lt; averageSampleSize; i++) {
-    int val = analogRead(sensorPin);
-    sensorReadings[i] = val;
-    total += val;
-    delay(20);
-  }
-
-  Serial.println("CALIBRATION: Relax your muscle for 5 seconds...");
-  long sum = 0;
-  int maxVal = 0;
-  int minVal = 1023;
-  const int calibrationSamples = 100;
-
-  for (int i = 0; i &lt; calibrationSamples; i++) {
-    int val = analogRead(sensorPin);
-    sum += val;
-    maxVal = max(maxVal, val);
-    minVal = min(minVal, val);
-    if (i % 10 == 0) {
-      Serial.print("Sample ");
-      Serial.print(i);
-      Serial.print(": ");
-      Serial.println(val);
-    }
-    delay(50);
-  }
-
-  long baseline = sum / calibrationSamples;
-  int variance = maxVal - minVal;
-
-  threshold = baseline + thresholdOffset;
-
-  Serial.println("\n--- Calibration Results ---");
-  Serial.print("Min value: ");
-  Serial.println(minVal);
-  Serial.print("Max value: ");
-  Serial.println(maxVal);
-  Serial.print("Baseline: ");
-  Serial.println(baseline);
-  Serial.print("Variance: ");
-  Serial.println(variance);
-  Serial.print("Threshold set to: ");
-  Serial.println(threshold);
-  Serial.println("-------------------------");
-  Serial.println("Now flex your muscle to test!");
+  pinMode(9, OUTPUT); // 서보 또는 LED 연결
 }
 
 void loop() {
-  int newValue = analogRead(sensorPin);
-
-  total -= sensorReadings[index];
-  sensorReadings[index] = newValue;
-  total += sensorReadings[index];
-  index = (index + 1) % averageSampleSize;
-
-  int avgValue = total / averageSampleSize;
-
-  Serial.print("Raw: ");
-  Serial.print(newValue);
-  Serial.print(" | Avg: ");
-  Serial.print(avgValue);
-  Serial.print(" | Threshold: ");
-  Serial.print(threshold);
-
-  unsigned long currentTime = millis();
-  if (avgValue &gt; threshold &amp;&amp; !isActivated &amp;&amp; (currentTime - lastToggleTime &gt; debounceTime)) {
-    toggleServo();
-    isActivated = true;
-    lastToggleTime = currentTime;
-    Serial.print(" | ACTIVATED!");
+  int emg = analogRead(emgPin);
+  if (emg > threshold) {
+    digitalWrite(9, HIGH); // 근육 수축 시 동작
+    Serial.println("엄지 감지됨");
+  } else {
+    digitalWrite(9, LOW);
   }
+  delay(100);
+}</code></pre>
 
-  if (avgValue &lt; (threshold - hysteresis)) {
-    isActivated = false;
-  }
+    <h2>피드백 남기기 💬</h2>
+    <form class="comment-form" onsubmit="addReview(event)">
+      <input type="text" id="nameInput" placeholder="이름" required />
+      <textarea id="commentInput" placeholder="프로젝트에 대한 의견이나 질문을 남겨주세요" required></textarea>
+      <button type="submit">등록</button>
+    </form>
 
-  Serial.println();
-  delay(50);
-}
+    <div class="comment-list" id="commentList">
+      <!-- 댓글이 여기에 표시됩니다 -->
+    </div>
+  </div>
 
-void toggleServo() {
-  int target = (lastServoPosition == 0) ? 180 : 0;
-  int step = (target &gt; lastServoPosition) ? 5 : -5;
-  for (int pos = lastServoPosition; pos != target; pos += step) {
-    myServo.write(pos);
-    delay(15);
-  }
-  myServo.write(target);
-  lastServoPosition = target;
-  Serial.print("Servo toggled to: ");
-  Serial.println(target);
-}
-</code></pre>
-    </section>
-
-    <section>
-      <h2>🗨️ Leave a Comment</h2>
-      <div id="comment-section"></div>
-      <textarea id="comment-input" placeholder="Write a comment..."></textarea>
-      <input type="file" id="media-input" multiple accept="image/*,video/*">
-      <button onclick="addComment()">Post Comment</button>
-    </section>
-  </main>
   <script>
-    function createMediaElements(files) {
-      const mediaElements = [];
-      for (const file of files) {
-        const url = URL.createObjectURL(file);
-        if (file.type.startsWith('image')) {
-          mediaElements.push(`<img src="${url}" alt="uploaded image">`);
-        } else if (file.type.startsWith('video')) {
-          mediaElements.push(`<video controls src="${url}"></video>`);
+    let comments = JSON.parse(localStorage.getItem("bionicComments") || "[]");
+
+    function saveComments() {
+      localStorage.setItem("bionicComments", JSON.stringify(comments));
+    }
+
+    function renderComments() {
+      const list = document.getElementById("commentList");
+      list.innerHTML = "";
+      comments.forEach((c, i) => {
+        const item = document.createElement("div");
+        item.className = "comment-item";
+        item.innerHTML = `<strong>${c.name}</strong>: ${c.text}<br>`;
+
+        const replyBtn = document.createElement("button");
+        replyBtn.className = "reply-button";
+        replyBtn.textContent = "답글 달기";
+        replyBtn.onclick = () => showReplyBox(i);
+        item.appendChild(replyBtn);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-button";
+        deleteBtn.textContent = "삭제";
+        deleteBtn.onclick = () => deleteComment(i);
+        item.appendChild(deleteBtn);
+
+        if (c.replies && c.replies.length > 0) {
+          c.replies.forEach(r => {
+            const replyDiv = document.createElement("div");
+            replyDiv.className = "reply-box";
+            replyDiv.textContent = `${r.name}: ${r.text}`;
+            item.appendChild(replyDiv);
+          });
         }
+
+        list.appendChild(item);
+      });
+    }
+
+    function addReview(event) {
+      event.preventDefault();
+      const name = document.getElementById("nameInput").value.trim();
+      const comment = document.getElementById("commentInput").value.trim();
+      if (name && comment) {
+        comments.push({ name, text: comment, replies: [] });
+        saveComments();
+        renderComments();
+        document.getElementById("nameInput").value = "";
+        document.getElementById("commentInput").value = "";
       }
-      return mediaElements.join('');
     }
 
-    function addComment(parentId = null) {
-      const input = document.getElementById('comment-input');
-      const mediaInput = document.getElementById('media-input');
-      const commentText = input.value.trim();
-      const files = mediaInput.files;
-      if (!commentText && files.length === 0) return;
-
-      const commentBox = document.createElement('div');
-      commentBox.className = parentId ? 'comment reply' : 'comment';
-
-      const mediaHTML = createMediaElements(files);
-      commentBox.innerHTML = `<p>${commentText}</p>${mediaHTML}<button onclick="deleteComment(this)">Delete</button><button onclick="replyTo(this)">Reply</button>`;
-
-      if (parentId) {
-        parentId.appendChild(commentBox);
-      } else {
-        document.getElementById('comment-section').appendChild(commentBox);
+    function showReplyBox(index) {
+      const name = prompt("이름을 입력하세요:");
+      const reply = prompt("답글 내용을 입력하세요:");
+      if (name && reply) {
+        comments[index].replies.push({ name, text: reply });
+        saveComments();
+        renderComments();
       }
-
-      input.value = '';
-      mediaInput.value = '';
     }
 
-    function replyTo(btn) {
-      const parentComment = btn.parentElement;
-      const replyInput = document.createElement('textarea');
-      const replyMedia = document.createElement('input');
-      replyMedia.type = 'file';
-      replyMedia.multiple = true;
-      replyMedia.accept = 'image/*,video/*';
-      const replyBtn = document.createElement('button');
-      replyBtn.textContent = 'Post Reply';
-      replyBtn.onclick = () => {
-        const tempInput = document.createElement('textarea');
-        tempInput.value = replyInput.value;
-        document.body.appendChild(tempInput);
-        const mediaFakeInput = document.createElement('input');
-        mediaFakeInput.files = replyMedia.files;
-        addComment(parentComment);
-        document.body.removeChild(tempInput);
-      };
-      parentComment.appendChild(replyInput);
-      parentComment.appendChild(replyMedia);
-      parentComment.appendChild(replyBtn);
-      btn.disabled = true;
+    function deleteComment(index) {
+      if (confirm("정말 이 댓글을 삭제하시겠습니까?")) {
+        comments.splice(index, 1);
+        saveComments();
+        renderComments();
+      }
     }
 
-    function deleteComment(btn) {
-      btn.parentElement.remove();
-    }
+    renderComments();
   </script>
+
 </body>
 </html>
