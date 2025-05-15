@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bionic Hand 프로젝트 댓글 + 미디어 첨부</title>
+  <title>Bionic Hand 블로그</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0; padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f2f4f6;
       color: #333;
     }
     header {
-      background: #006666;
+      background: #004d4d;
       color: white;
       padding: 2rem;
       text-align: center;
@@ -21,16 +21,45 @@
       max-width: 800px;
       margin: 2rem auto;
       background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     h2 {
-      border-bottom: 2px solid #eee;
-      padding-bottom: 0.3rem;
+      margin-top: 2rem;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 0.5rem;
     }
-    ul {
-      padding-left: 1.5rem;
+    a.button {
+      background: #008080;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 8px;
+      position: relative;
+    }
+    button.copy {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #006666;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    img, iframe {
+      max-width: 100%;
+      border-radius: 5px;
     }
     .comment-form input,
     .comment-form textarea {
@@ -42,15 +71,12 @@
       box-sizing: border-box;
     }
     .comment-form button {
-      background: #006666;
+      background: #004d4d;
       color: white;
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-    }
-    .comment-list {
-      margin-top: 1rem;
     }
     .comment-item {
       padding: 0.5rem;
@@ -60,46 +86,52 @@
       margin-left: 1.5rem;
       padding-left: 1rem;
       border-left: 2px solid #ddd;
-      margin-top: 0.5rem;
     }
     .reply-button,
     .delete-button {
-      font-size: 0.9rem;
-      color: #006666;
       background: none;
+      color: #008080;
       border: none;
       cursor: pointer;
-      padding: 0 0.3rem;
-    }
-    a {
-      color: #006666;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    img, iframe {
-      max-width: 100%;
-      border-radius: 5px;
-      margin-top: 0.3rem;
-    }
-    iframe {
-      aspect-ratio: 16/9;
-    }
-    .media-label {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 0.2rem;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Bionic Hand 프로젝트</h1>
-    <p>MYOWARE 2.0을 이용한 엄지 근전도 제어 의수</p>
+    <h1>Bionic Hand 프로젝트 블로그</h1>
+    <p>MYOWARE 2.0을 이용한 근전도 기반 의수 - 엄지 제어</p>
   </header>
+
   <div class="container">
-    <h2>피드백 남기기 💬</h2>
+    <h2>📎 프로젝트 개요</h2>
+    <p>본 프로젝트는 MYOWARE 2.0 센서를 통해 손가락 중 엄지를 제어하는 Bionic Hand 의수 장치를 만드는 것을 목표로 하였습니다.</p>
+    <a class="button" href="https://example.com/your-ppt-link" target="_blank">PPT 보러가기</a>
+
+    <h2>🧠 아두이노 코드</h2>
+    <pre><code id="code">
+#define THRESHOLD 300
+int sensorPin = A0;
+int ledPin = 9;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int emgValue = analogRead(sensorPin);
+  Serial.println(emgValue);
+  if (emgValue > THRESHOLD) {
+    digitalWrite(ledPin, HIGH);
+  } else {
+    digitalWrite(ledPin, LOW);
+  }
+  delay(50);
+}
+    </code><button class="copy" onclick="copyCode()">복사</button></pre>
+
+    <h2>💬 리뷰 및 댓글</h2>
     <form class="comment-form" onsubmit="addComment(event)">
       <input type="text" id="nameInput" placeholder="이름" required />
       <textarea id="commentInput" placeholder="댓글 내용을 입력하세요" required></textarea>
@@ -107,13 +139,11 @@
       <button type="submit">등록</button>
     </form>
 
-    <div class="comment-list" id="commentList">
-      <!-- 댓글들이 여기 표시됩니다 -->
-    </div>
+    <div class="comment-list" id="commentList"></div>
   </div>
 
   <script>
-    let comments = JSON.parse(localStorage.getItem("bionicComments") || "[]");
+    const comments = JSON.parse(localStorage.getItem("bionicComments") || "[]");
 
     function saveComments() {
       localStorage.setItem("bionicComments", JSON.stringify(comments));
@@ -125,47 +155,34 @@
       comments.forEach((c, i) => {
         const item = document.createElement("div");
         item.className = "comment-item";
-        let mediaHTML = "";
-        if (c.media) {
-          mediaHTML = getMediaHTML(c.media);
-        }
         item.innerHTML = `
-          <strong>${escapeHTML(c.name)}</strong>: ${escapeHTML(c.text)}<br>
-          ${mediaHTML}
+          <strong>${c.name}</strong>: ${c.text}<br>
+          ${getMediaHTML(c.media)}
+          <button class="reply-button" onclick="reply(${i})">답글</button>
+          <button class="delete-button" onclick="deleteComment(${i})">삭제</button>
         `;
-
-        // 답글, 삭제 버튼
-        const replyBtn = document.createElement("button");
-        replyBtn.className = "reply-button";
-        replyBtn.textContent = "답글 달기";
-        replyBtn.onclick = () => showReplyBox(i);
-        item.appendChild(replyBtn);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delete-button";
-        deleteBtn.textContent = "삭제";
-        deleteBtn.onclick = () => deleteComment(i);
-        item.appendChild(deleteBtn);
-
-        // 답글 목록
-        if (c.replies && c.replies.length > 0) {
-          c.replies.forEach(r => {
-            const replyDiv = document.createElement("div");
-            replyDiv.className = "reply-box";
-            let replyMediaHTML = "";
-            if(r.media) replyMediaHTML = getMediaHTML(r.media);
-            replyDiv.innerHTML = `<strong>${escapeHTML(r.name)}</strong>: ${escapeHTML(r.text)}<br>${replyMediaHTML}`;
-            item.appendChild(replyDiv);
-          });
-        }
-
+        (c.replies || []).forEach(r => {
+          const replyDiv = document.createElement("div");
+          replyDiv.className = "reply-box";
+          replyDiv.innerHTML = `<strong>${r.name}</strong>: ${r.text}<br>${getMediaHTML(r.media)}`;
+          item.appendChild(replyDiv);
+        });
         list.appendChild(item);
       });
     }
 
-    // 댓글 등록
-    function addComment(event) {
-      event.preventDefault();
+    function getMediaHTML(url) {
+      if (!url) return "";
+      if (url.includes("youtube") || url.includes("youtu.be")) {
+        return `<iframe src="${url}" frameborder="0" allowfullscreen></iframe>`;
+      } else if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+        return `<img src="${url}" alt="첨부 이미지" />`;
+      }
+      return `<a href="${url}" target="_blank">${url}</a>`;
+    }
+
+    function addComment(e) {
+      e.preventDefault();
       const name = document.getElementById("nameInput").value.trim();
       const text = document.getElementById("commentInput").value.trim();
       const media = document.getElementById("mediaInput").value.trim();
@@ -173,61 +190,33 @@
         comments.push({ name, text, media: media || null, replies: [] });
         saveComments();
         renderComments();
-        // 입력란 초기화
-        document.getElementById("nameInput").value = "";
-        document.getElementById("commentInput").value = "";
-        document.getElementById("mediaInput").value = "";
+        e.target.reset();
       }
     }
 
-    // 답글 입력창 띄우기
-    function showReplyBox(index) {
-      const name = prompt("이름을 입력하세요:");
-      if (!name) return alert("이름은 필수입니다.");
-      const text = prompt("답글 내용을 입력하세요:");
-      if (!text) return alert("답글 내용을 입력하세요.");
-      const media = prompt("사진/동영상 URL을 입력하세요 (선택)");
-      if (!comments[index].replies) comments[index].replies = [];
-      comments[index].replies.push({ name, text, media: media || null });
-      saveComments();
-      renderComments();
+    function reply(index) {
+      const name = prompt("이름:");
+      const text = prompt("답글 내용:");
+      const media = prompt("사진/동영상 URL (선택)");
+      if (name && text) {
+        comments[index].replies = comments[index].replies || [];
+        comments[index].replies.push({ name, text, media });
+        saveComments();
+        renderComments();
+      }
     }
 
-    // 댓글 삭제
     function deleteComment(index) {
-      if (confirm("정말 이 댓글을 삭제하시겠습니까?")) {
+      if (confirm("댓글을 삭제할까요?")) {
         comments.splice(index, 1);
         saveComments();
         renderComments();
       }
     }
 
-    // 미디어 출력 HTML 생성
-    function getMediaHTML(url) {
-      if (!url) return "";
-      // 유튜브, 비메오 등 iframe 동영상 처리
-      if (url.includes("youtube.com") || url.includes("youtu.be") || url.includes("vimeo.com")) {
-        return `<div class="media-label">동영상:</div><iframe src="${escapeHTML(url)}" frameborder="0" allowfullscreen></iframe>`;
-      }
-      // 이미지 파일인 경우 (jpg, png, gif, webp 등)
-      if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-        return `<div class="media-label">사진:</div><img src="${escapeHTML(url)}" alt="첨부 이미지" />`;
-      }
-      // 그 외는 그냥 링크로 표시
-      return `<div class="media-label">링크:</div><a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>`;
-    }
-
-    // HTML 특수문자 이스케이프
-    function escapeHTML(text) {
-      return text.replace(/[&<>"']/g, function(match) {
-        return {
-          '&': "&amp;",
-          '<': "&lt;",
-          '>': "&gt;",
-          '"': "&quot;",
-          "'": "&#39;"
-        }[match];
-      });
+    function copyCode() {
+      const code = document.getElementById("code").innerText;
+      navigator.clipboard.writeText(code).then(() => alert("복사 완료!"));
     }
 
     renderComments();
