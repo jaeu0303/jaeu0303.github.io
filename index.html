@@ -1,225 +1,249 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bionic Hand 블로그</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bionic Hand Project</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
       margin: 0;
-      background: #f2f4f6;
-      color: #333;
-    }
-    header {
-      background: #004d4d;
-      color: white;
-      padding: 2rem;
-      text-align: center;
+      padding: 0;
+      background-color: #f4f4f4;
     }
     .container {
       max-width: 800px;
       margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
     }
-    h2 {
-      margin-top: 2rem;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 0.5rem;
-    }
-    a.button {
-      background: #008080;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      text-decoration: none;
-      margin-top: 0.5rem;
-      display: inline-block;
+    h1, h2 {
+      color: #333;
     }
     pre {
-      background: #f4f4f4;
+      background: #eee;
       padding: 1rem;
       overflow-x: auto;
-      border-radius: 8px;
       position: relative;
     }
     button.copy {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: #006666;
-      color: white;
+      background: #007bff;
+      color: #fff;
       border: none;
-      padding: 0.3rem 0.7rem;
-      border-radius: 4px;
+      padding: 5px 10px;
       cursor: pointer;
     }
-    img, iframe {
-      max-width: 100%;
-      border-radius: 5px;
+    .comment-section {
+      margin-top: 2rem;
     }
-    .comment-form input,
-    .comment-form textarea {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      border-radius: 5px;
+    .comment {
       border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    .comment-form button {
-      background: #004d4d;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
+      padding: 1rem;
+      margin-top: 1rem;
       border-radius: 5px;
-      cursor: pointer;
+      background: #fafafa;
     }
-    .comment-item {
-      padding: 0.5rem;
-      border-bottom: 1px solid #eee;
+    .reply {
+      margin-left: 2rem;
+      background: #f1f1f1;
     }
-    .reply-box {
-      margin-left: 1.5rem;
-      padding-left: 1rem;
-      border-left: 2px solid #ddd;
-    }
-    .reply-button,
-    .delete-button {
-      background: none;
-      color: #008080;
-      border: none;
-      cursor: pointer;
-      font-size: 0.9rem;
+    img, video {
+      max-width: 100%;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Bionic Hand 프로젝트 블로그</h1>
-    <p>MYOWARE 2.0을 이용한 근전도 기반 의수 - 엄지 제어</p>
-  </header>
-
   <div class="container">
-    <h2>📎 프로젝트 개요</h2>
-    <p>본 프로젝트는 MYOWARE 2.0 센서를 통해 손가락 중 엄지를 제어하는 Bionic Hand 의수 장치를 만드는 것을 목표로 하였습니다.</p>
-    <a class="button" href="https://example.com/your-ppt-link" target="_blank">PPT 보러가기</a>
+    <h1>Bionic Hand Project</h1>
+    <p>이 프로젝트는 근전도(EMG) 센서를 이용하여 손가락(엄지)의 움직임을 제어하는 의수 시스템입니다. 아두이노와 MYOWARE 2.0 센서를 활용하여 사용자의 근육 신호를 감지하고, 그에 따라 서보모터를 제어하여 실제 손가락 움직임처럼 작동합니다.</p>
+    <p><a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" target="_blank">📎 프로젝트 발표 PPT 보기</a></p>
 
-    <h2>🧠 아두이노 코드</h2>
-    <pre><code id="code">
-#define THRESHOLD 300
-int sensorPin = A0;
-int ledPin = 9;
+    <h2>아두이노 코드</h2>
+    <pre><button class="copy" onclick="copyCode()">Copy</button><code id="code">
+#include <Servo.h>
+
+Servo myServo;
+
+const int sensorPin = A0;
+const int averageSampleSize = 10;
+int sensorReadings[averageSampleSize];
+int index = 0;
+long total = 0;
+
+long threshold = 0;
+const int hysteresis = 5;
+const int thresholdOffset = 15;
+
+bool isActivated = false;
+int lastServoPosition = 0;
+unsigned long lastToggleTime = 0;
+const unsigned long debounceTime = 500;
 
 void setup() {
-  pinMode(ledPin, OUTPUT);
+  myServo.attach(9);
   Serial.begin(9600);
+  myServo.write(0);
+  delay(1000);
+
+  for (int i = 0; i < averageSampleSize; i++) {
+    sensorReadings[i] = 0;
+  }
+
+  Serial.println("Pre-filling readings buffer...");
+  for (int i = 0; i < averageSampleSize; i++) {
+    int val = analogRead(sensorPin);
+    sensorReadings[i] = val;
+    total += val;
+    delay(20);
+  }
+
+  Serial.println("CALIBRATION: Relax your muscle for 5 seconds...");
+  long sum = 0;
+  int maxVal = 0;
+  int minVal = 1023;
+  const int calibrationSamples = 100;
+
+  for (int i = 0; i < calibrationSamples; i++) {
+    int val = analogRead(sensorPin);
+    sum += val;
+    maxVal = max(maxVal, val);
+    minVal = min(minVal, val);
+    if (i % 10 == 0) {
+      Serial.print("Sample ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(val);
+    }
+    delay(50);
+  }
+
+  long baseline = sum / calibrationSamples;
+  int variance = maxVal - minVal;
+  threshold = baseline + thresholdOffset;
+
+  Serial.println("\n--- Calibration Results ---");
+  Serial.print("Min value: "); Serial.println(minVal);
+  Serial.print("Max value: "); Serial.println(maxVal);
+  Serial.print("Baseline: "); Serial.println(baseline);
+  Serial.print("Variance: "); Serial.println(variance);
+  Serial.print("Threshold set to: "); Serial.println(threshold);
+  Serial.println("-------------------------");
+  Serial.println("Now flex your muscle to test!");
 }
 
 void loop() {
-  int emgValue = analogRead(sensorPin);
-  Serial.println(emgValue);
-  if (emgValue > THRESHOLD) {
-    digitalWrite(ledPin, HIGH);
-  } else {
-    digitalWrite(ledPin, LOW);
+  int newValue = analogRead(sensorPin);
+  total -= sensorReadings[index];
+  sensorReadings[index] = newValue;
+  total += sensorReadings[index];
+  index = (index + 1) % averageSampleSize;
+
+  int avgValue = total / averageSampleSize;
+
+  Serial.print("Raw: "); Serial.print(newValue);
+  Serial.print(" | Avg: "); Serial.print(avgValue);
+  Serial.print(" | Threshold: "); Serial.print(threshold);
+
+  unsigned long currentTime = millis();
+  if (avgValue > threshold && !isActivated && (currentTime - lastToggleTime > debounceTime)) {
+    toggleServo();
+    isActivated = true;
+    lastToggleTime = currentTime;
+    Serial.print(" | ACTIVATED!");
   }
+
+  if (avgValue < (threshold - hysteresis)) {
+    isActivated = false;
+  }
+
+  Serial.println();
   delay(50);
 }
-    </code><button class="copy" onclick="copyCode()">복사</button></pre>
 
-    <h2>💬 리뷰 및 댓글</h2>
-    <form class="comment-form" onsubmit="addComment(event)">
-      <input type="text" id="nameInput" placeholder="이름" required />
-      <textarea id="commentInput" placeholder="댓글 내용을 입력하세요" required></textarea>
-      <input type="url" id="mediaInput" placeholder="사진/동영상 URL (선택)" />
-      <button type="submit">등록</button>
-    </form>
+void toggleServo() {
+  int target = (lastServoPosition == 0) ? 180 : 0;
+  int step = (target > lastServoPosition) ? 5 : -5;
+  for (int pos = lastServoPosition; pos != target; pos += step) {
+    myServo.write(pos);
+    delay(15);
+  }
+  myServo.write(target);
+  lastServoPosition = target;
+  Serial.print("Servo toggled to: ");
+  Serial.println(target);
+}</code></pre>
 
-    <div class="comment-list" id="commentList"></div>
+    <div class="comment-section">
+      <h2>리뷰 및 댓글</h2>
+      <div id="comments"></div>
+      <textarea id="comment-input" placeholder="댓글을 입력하세요"></textarea><br/>
+      <input type="text" id="media-url" placeholder="사진 또는 동영상 URL (선택)" /><br/>
+      <button onclick="addComment()">댓글 작성</button>
+    </div>
   </div>
 
   <script>
-    const comments = JSON.parse(localStorage.getItem("bionicComments") || "[]");
-
-    function saveComments() {
-      localStorage.setItem("bionicComments", JSON.stringify(comments));
-    }
-
-    function renderComments() {
-      const list = document.getElementById("commentList");
-      list.innerHTML = "";
-      comments.forEach((c, i) => {
-        const item = document.createElement("div");
-        item.className = "comment-item";
-        item.innerHTML = `
-          <strong>${c.name}</strong>: ${c.text}<br>
-          ${getMediaHTML(c.media)}
-          <button class="reply-button" onclick="reply(${i})">답글</button>
-          <button class="delete-button" onclick="deleteComment(${i})">삭제</button>
-        `;
-        (c.replies || []).forEach(r => {
-          const replyDiv = document.createElement("div");
-          replyDiv.className = "reply-box";
-          replyDiv.innerHTML = `<strong>${r.name}</strong>: ${r.text}<br>${getMediaHTML(r.media)}`;
-          item.appendChild(replyDiv);
-        });
-        list.appendChild(item);
+    function copyCode() {
+      const code = document.getElementById("code").innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert("코드가 복사되었습니다!");
       });
     }
 
-    function getMediaHTML(url) {
-      if (!url) return "";
-      if (url.includes("youtube") || url.includes("youtu.be")) {
-        return `<iframe src="${url}" frameborder="0" allowfullscreen></iframe>`;
-      } else if (url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-        return `<img src="${url}" alt="첨부 이미지" />`;
+    let commentId = 0;
+    function addComment(parentId = null) {
+      const input = document.getElementById('comment-input');
+      const media = document.getElementById('media-url');
+      const commentsDiv = document.getElementById('comments');
+      const text = input.value.trim();
+      const mediaLink = media.value.trim();
+      if (!text) return;
+
+      const div = document.createElement('div');
+      div.className = parentId ? 'comment reply' : 'comment';
+      div.id = `comment-${commentId++}`;
+
+      div.innerHTML = `<p>${text}</p>`;
+      if (mediaLink) {
+        if (mediaLink.endsWith('.mp4')) {
+          div.innerHTML += `<video src="${mediaLink}" controls></video>`;
+        } else {
+          div.innerHTML += `<img src="${mediaLink}" />`;
+        }
       }
-      return `<a href="${url}" target="_blank">${url}</a>`;
+      div.innerHTML += `<button onclick="replyTo('${div.id}')">답글</button>
+                        <button onclick="deleteComment('${div.id}')">삭제</button>`;
+      if (parentId) {
+        document.getElementById(parentId).appendChild(div);
+      } else {
+        commentsDiv.appendChild(div);
+      }
+      input.value = '';
+      media.value = '';
     }
 
-    function addComment(e) {
-      e.preventDefault();
-      const name = document.getElementById("nameInput").value.trim();
-      const text = document.getElementById("commentInput").value.trim();
-      const media = document.getElementById("mediaInput").value.trim();
-      if (name && text) {
-        comments.push({ name, text, media: media || null, replies: [] });
-        saveComments();
-        renderComments();
-        e.target.reset();
+    function replyTo(id) {
+      const text = prompt("답글을 입력하세요:");
+      if (text) {
+        const replyDiv = document.createElement('div');
+        replyDiv.className = 'comment reply';
+        replyDiv.innerHTML = `<p>${text}</p>
+                              <button onclick="deleteComment(this.parentNode.id)">삭제</button>`;
+        replyDiv.id = `comment-${commentId++}`;
+        document.getElementById(id).appendChild(replyDiv);
       }
     }
 
-    function reply(index) {
-      const name = prompt("이름:");
-      const text = prompt("답글 내용:");
-      const media = prompt("사진/동영상 URL (선택)");
-      if (name && text) {
-        comments[index].replies = comments[index].replies || [];
-        comments[index].replies.push({ name, text, media });
-        saveComments();
-        renderComments();
-      }
+    function deleteComment(id) {
+      const comment = document.getElementById(id);
+      if (comment) comment.remove();
     }
-
-    function deleteComment(index) {
-      if (confirm("댓글을 삭제할까요?")) {
-        comments.splice(index, 1);
-        saveComments();
-        renderComments();
-      }
-    }
-
-    function copyCode() {
-      const code = document.getElementById("code").innerText;
-      navigator.clipboard.writeText(code).then(() => alert("복사 완료!"));
-    }
-
-    renderComments();
   </script>
 </body>
 </html>
