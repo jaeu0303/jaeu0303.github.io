@@ -76,6 +76,19 @@
       border-bottom: 1px solid #eee;
     }
 
+    .reply-box {
+      margin-left: 1rem;
+    }
+
+    .reply-button {
+      font-size: 0.9rem;
+      color: #006666;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
     a {
       color: #006666;
       text-decoration: none;
@@ -111,8 +124,7 @@
     </ul>
 
     <h2>예시 코드 (Arduino)</h2>
-    <pre><code>
-// MYOWARE 2.0을 이용한 엄지 감지 예시 코드
+    <pre><code>// MYOWARE 2.0을 이용한 엄지 감지 예시 코드
 int emgPin = A0;
 int threshold = 500;
 
@@ -130,8 +142,7 @@ void loop() {
     digitalWrite(9, LOW);
   }
   delay(100);
-}
-    </code></pre>
+}</code></pre>
 
     <h2>피드백 남기기 💬</h2>
     <form class="comment-form" onsubmit="addReview(event)">
@@ -146,23 +157,65 @@ void loop() {
   </div>
 
   <script>
+    let comments = JSON.parse(localStorage.getItem("bionicComments") || "[]");
+
+    function saveComments() {
+      localStorage.setItem("bionicComments", JSON.stringify(comments));
+    }
+
+    function renderComments() {
+      const list = document.getElementById("commentList");
+      list.innerHTML = "";
+      comments.forEach((c, i) => {
+        const item = document.createElement("div");
+        item.className = "comment-item";
+        item.innerHTML = `<strong>${c.name}</strong>: ${c.text}<br>`;
+
+        // 답글 버튼
+        const replyBtn = document.createElement("button");
+        replyBtn.className = "reply-button";
+        replyBtn.textContent = "답글 달기";
+        replyBtn.onclick = () => showReplyBox(i);
+        item.appendChild(replyBtn);
+
+        // 답글 표시
+        if (c.replies && c.replies.length > 0) {
+          c.replies.forEach(r => {
+            const replyDiv = document.createElement("div");
+            replyDiv.className = "reply-box";
+            replyDiv.textContent = `${r.name}: ${r.text}`;
+            item.appendChild(replyDiv);
+          });
+        }
+
+        list.appendChild(item);
+      });
+    }
+
     function addReview(event) {
       event.preventDefault();
-
       const name = document.getElementById("nameInput").value.trim();
       const comment = document.getElementById("commentInput").value.trim();
-
       if (name && comment) {
-        const commentList = document.getElementById("commentList");
-        const div = document.createElement("div");
-        div.className = "comment-item";
-        div.textContent = `${name}: ${comment}`;
-        commentList.appendChild(div);
-
+        comments.push({ name, text: comment, replies: [] });
+        saveComments();
+        renderComments();
         document.getElementById("nameInput").value = "";
         document.getElementById("commentInput").value = "";
       }
     }
+
+    function showReplyBox(index) {
+      const name = prompt("이름을 입력하세요:");
+      const reply = prompt("답글 내용을 입력하세요:");
+      if (name && reply) {
+        comments[index].replies.push({ name, text: reply });
+        saveComments();
+        renderComments();
+      }
+    }
+
+    renderComments();
   </script>
 
 </body>
