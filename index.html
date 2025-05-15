@@ -6,58 +6,76 @@
   <title>Bionic Hand Project</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      line-height: 1.6;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
     }
-    h1, h2 {
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    h2 {
       color: #2c3e50;
     }
     pre {
-      background-color: #f4f4f4;
+      background: #f0f0f0;
       padding: 15px;
       overflow-x: auto;
       border-radius: 5px;
     }
-    code {
-      font-family: Consolas, monospace;
-    }
-    .comment-box, .reply-box {
-      margin-top: 20px;
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      box-sizing: border-box;
     }
     .comment {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 10px;
+      border-top: 1px solid #ddd;
+      padding: 10px 0;
     }
     .reply {
       margin-left: 20px;
-      border-left: 2px solid #ddd;
+      border-left: 2px solid #eee;
       padding-left: 10px;
     }
-    .media {
-      margin-top: 10px;
-    }
-    textarea, input[type="file"] {
-      width: 100%;
-      margin-bottom: 10px;
+    .comment img, .comment video {
+      max-width: 100%;
+      margin-top: 5px;
+      border-radius: 5px;
     }
     button {
-      padding: 5px 10px;
+      background: #2980b9;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
+    }
+    button:hover {
+      background: #3498db;
     }
   </style>
 </head>
 <body>
-  <h1>Bionic Hand 프로젝트</h1>
-  <p>MYOWARE 2.0 근전도 센서를 활용한 엄지 손가락 제어 시스템</p>
-  <p><strong>프로젝트 발표 자료:</strong> <a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" target="_blank">Gamma PPT 보기</a></p>
-
-  <h2>아두이노 코드</h2>
-  <pre><code>#include &lt;Servo.h&gt;
+  <header>
+    <h1>Bionic Hand Project</h1>
+    <p><a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" style="color: #ecf0f1; text-decoration: underline;">📎 PPT 링크</a></p>
+  </header>
+  <main>
+    <section>
+      <h2>🔧 Arduino Code</h2>
+      <pre><code>#include &lt;Servo.h&gt;
 
 Servo myServo;
 
@@ -67,7 +85,7 @@ int sensorReadings[averageSampleSize];
 int index = 0;
 long total = 0;
 
-long threshold = 0; // Will be set automatically
+long threshold = 0;
 const int hysteresis = 5;
 const int thresholdOffset = 15;
 
@@ -81,9 +99,11 @@ void setup() {
   Serial.begin(9600);
   myServo.write(0);
   delay(1000);
+
   for (int i = 0; i &lt; averageSampleSize; i++) {
     sensorReadings[i] = 0;
   }
+
   Serial.println("Pre-filling readings buffer...");
   for (int i = 0; i &lt; averageSampleSize; i++) {
     int val = analogRead(sensorPin);
@@ -91,11 +111,13 @@ void setup() {
     total += val;
     delay(20);
   }
+
   Serial.println("CALIBRATION: Relax your muscle for 5 seconds...");
   long sum = 0;
   int maxVal = 0;
   int minVal = 1023;
   const int calibrationSamples = 100;
+
   for (int i = 0; i &lt; calibrationSamples; i++) {
     int val = analogRead(sensorPin);
     sum += val;
@@ -109,9 +131,12 @@ void setup() {
     }
     delay(50);
   }
+
   long baseline = sum / calibrationSamples;
   int variance = maxVal - minVal;
+
   threshold = baseline + thresholdOffset;
+
   Serial.println("\n--- Calibration Results ---");
   Serial.print("Min value: ");
   Serial.println(minVal);
@@ -129,17 +154,21 @@ void setup() {
 
 void loop() {
   int newValue = analogRead(sensorPin);
+
   total -= sensorReadings[index];
   sensorReadings[index] = newValue;
   total += sensorReadings[index];
   index = (index + 1) % averageSampleSize;
+
   int avgValue = total / averageSampleSize;
+
   Serial.print("Raw: ");
   Serial.print(newValue);
   Serial.print(" | Avg: ");
   Serial.print(avgValue);
   Serial.print(" | Threshold: ");
   Serial.print(threshold);
+
   unsigned long currentTime = millis();
   if (avgValue &gt; threshold &amp;&amp; !isActivated &amp;&amp; (currentTime - lastToggleTime &gt; debounceTime)) {
     toggleServo();
@@ -147,9 +176,11 @@ void loop() {
     lastToggleTime = currentTime;
     Serial.print(" | ACTIVATED!");
   }
+
   if (avgValue &lt; (threshold - hysteresis)) {
     isActivated = false;
   }
+
   Serial.println();
   delay(50);
 }
@@ -167,81 +198,79 @@ void toggleServo() {
   Serial.println(target);
 }
 </code></pre>
+    </section>
 
-  <h2>리뷰 및 댓글</h2>
-  <div class="comment-box">
-    <textarea id="commentText" placeholder="댓글을 입력하세요..."></textarea>
-    <input type="file" id="mediaInput" accept="image/*,video/*">
-    <button onclick="addComment()">댓글 등록</button>
-  </div>
-  <div id="comments"></div>
-
+    <section>
+      <h2>🗨️ Leave a Comment</h2>
+      <div id="comment-section"></div>
+      <textarea id="comment-input" placeholder="Write a comment..."></textarea>
+      <input type="file" id="media-input" multiple accept="image/*,video/*">
+      <button onclick="addComment()">Post Comment</button>
+    </section>
+  </main>
   <script>
-    let comments = [];
+    function createMediaElements(files) {
+      const mediaElements = [];
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        if (file.type.startsWith('image')) {
+          mediaElements.push(`<img src="${url}" alt="uploaded image">`);
+        } else if (file.type.startsWith('video')) {
+          mediaElements.push(`<video controls src="${url}"></video>`);
+        }
+      }
+      return mediaElements.join('');
+    }
 
-    function addComment() {
-      const text = document.getElementById("commentText").value;
-      const fileInput = document.getElementById("mediaInput");
-      const file = fileInput.files[0];
-      const id = Date.now();
+    function addComment(parentId = null) {
+      const input = document.getElementById('comment-input');
+      const mediaInput = document.getElementById('media-input');
+      const commentText = input.value.trim();
+      const files = mediaInput.files;
+      if (!commentText && files.length === 0) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const mediaUrl = e.target.result;
-        comments.push({ id, text, mediaUrl, replies: [] });
-        document.getElementById("commentText").value = "";
-        fileInput.value = null;
-        renderComments();
-      };
+      const commentBox = document.createElement('div');
+      commentBox.className = parentId ? 'comment reply' : 'comment';
 
-      if (file) {
-        reader.readAsDataURL(file);
+      const mediaHTML = createMediaElements(files);
+      commentBox.innerHTML = `<p>${commentText}</p>${mediaHTML}<button onclick="deleteComment(this)">Delete</button><button onclick="replyTo(this)">Reply</button>`;
+
+      if (parentId) {
+        parentId.appendChild(commentBox);
       } else {
-        comments.push({ id, text, mediaUrl: null, replies: [] });
-        renderComments();
+        document.getElementById('comment-section').appendChild(commentBox);
       }
+
+      input.value = '';
+      mediaInput.value = '';
     }
 
-    function renderComments() {
-      const container = document.getElementById("comments");
-      container.innerHTML = "";
-      comments.forEach(comment => {
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.innerHTML = `<p>${comment.text}</p>` +
-          (comment.mediaUrl ? `<div class='media'>${getMediaHTML(comment.mediaUrl)}</div>` : '') +
-          `<div class='reply-box'>
-            <textarea placeholder='답글을 입력하세요...' data-id='${comment.id}'></textarea>
-            <button onclick='addReply(${comment.id})'>답글</button>
-          </div>
-          <button onclick='deleteComment(${comment.id})'>삭제</button>
-          <div class='reply-area'>${renderReplies(comment.replies)}</div>`;
-        container.appendChild(div);
-      });
+    function replyTo(btn) {
+      const parentComment = btn.parentElement;
+      const replyInput = document.createElement('textarea');
+      const replyMedia = document.createElement('input');
+      replyMedia.type = 'file';
+      replyMedia.multiple = true;
+      replyMedia.accept = 'image/*,video/*';
+      const replyBtn = document.createElement('button');
+      replyBtn.textContent = 'Post Reply';
+      replyBtn.onclick = () => {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = replyInput.value;
+        document.body.appendChild(tempInput);
+        const mediaFakeInput = document.createElement('input');
+        mediaFakeInput.files = replyMedia.files;
+        addComment(parentComment);
+        document.body.removeChild(tempInput);
+      };
+      parentComment.appendChild(replyInput);
+      parentComment.appendChild(replyMedia);
+      parentComment.appendChild(replyBtn);
+      btn.disabled = true;
     }
 
-    function getMediaHTML(url) {
-      return url.includes("video") ? `<video controls width="250" src="${url}"></video>` : `<img src="${url}" width="250">`;
-    }
-
-    function renderReplies(replies) {
-      return replies.map(reply => `<div class='reply'><p>${reply}</p></div>`).join('');
-    }
-
-    function addReply(commentId) {
-      const textarea = document.querySelector(`textarea[data-id='${commentId}']`);
-      const text = textarea.value;
-      const comment = comments.find(c => c.id === commentId);
-      if (comment && text) {
-        comment.replies.push(text);
-        textarea.value = "";
-        renderComments();
-      }
-    }
-
-    function deleteComment(id) {
-      comments = comments.filter(c => c.id !== id);
-      renderComments();
+    function deleteComment(btn) {
+      btn.parentElement.remove();
     }
   </script>
 </body>
