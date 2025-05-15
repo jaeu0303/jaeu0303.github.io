@@ -1,12 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Portfolio</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자율주행차와 도플러 효과</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f8f8;
+      color: #333;
+    }
+
+    header {
+      background-color: #004080;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.3rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+    }
+
+    pre {
+      background-color: #f4f4f4;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: 5px;
+    }
+
+    .comment-form {
+      margin-top: 1rem;
+    }
+
+    .comment-form input,
+    .comment-form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .comment-form button {
+      background-color: #004080;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .comment-list {
+      margin-top: 1rem;
+    }
+
+    .comment-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    a {
+      color: #004080;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <p>Hello, World!</p>
-</body>
-</html>
+
+  <header>
+    <h1>자율주행차와 도플러 효과</h1>
+    <p>도플러 효과를 활용한 차량 인식 기술 분석</p>
+  </header>
+
+  <div class="container">
+    <h2>소개 & 설명</h2>
+    <p><a href="https://your-ppt-link.com" target="_blank">📎 발표 자료(PPT) 보기</a></p>
+    <ul>
+      <li><strong>Author Credibility:</strong> 기술 논문과 전문가의 발표 자료 참고</li>
+      <li><strong>Validity:</strong> 자율주행 기업의 실제 사례와 비교</li>
+      <li><strong>Accuracy:</strong> 3개 이상의 논문과 기사 분석</li>
+      <li><strong>Relevancy:</strong> 2024년 이후 자료 중심</li>
+    </ul>
+
+    <h2>코드 예시</h2>
+    <pre><code>
+// 도플러 효과 기반 물체 감지 알고리즘 (예시)
+if (detected_frequency > expected_frequency) {
+  console.log("물체가 접근 중입니다");
+} else {
+  console.log("물체가 멀어지고 있습니다");
+}
+    </code></pre>
+
+    <h2>리뷰 남기기 💬</h2>
+    <form class="comment-form" onsubmit="addReview(event)">
+      <input type="text" id="nameInput" placeholder="이름" required />
+      <textarea id="commentInput" placeholder="리뷰를 작성해주세요" required></textarea>
+      <button type="submit">등록</button>
+    </form>
+
+    <div class="comment-list" id="commentList">
+      <!-- 여기에 리뷰가 추가됨 -->
+    </div>
+  </div>
+
+  <script>
+    function addReview(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("nameInput").value.trim();
+      const comment = document.getElementById("commentInput").value.trim();
+
+      if (name && comment) {
+        const commentList = document.getElementById("commentList");
+        const div = document.createElement("div");
+        div.class
