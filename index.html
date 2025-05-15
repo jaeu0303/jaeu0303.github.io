@@ -1,40 +1,81 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bionic Hand 프로젝트</title>
-<style>
-  body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 15px; }
-  h1 { color: #333; }
-  pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
-  a { color: #0066cc; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .comments { margin-top: 40px; }
-  .comment, .reply { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fafafa; }
-  .reply { margin-left: 30px; background: #f0f0f0; }
-  .comment-header { font-weight: bold; margin-bottom: 5px; }
-  .comment-content { white-space: pre-wrap; margin-bottom: 5px; }
-  button { cursor: pointer; margin-left: 5px; }
-  textarea { width: 100%; height: 60px; margin-top: 5px; }
-  input[type="text"] { width: 100%; padding: 6px; box-sizing: border-box; margin-top: 5px; }
-  form { margin-top: 10px; }
-  #copy-button { margin-bottom: 15px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bionic Hand Project</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    pre {
+      background: #f0f0f0;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 5px;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      box-sizing: border-box;
+    }
+    .comment {
+      border-top: 1px solid #ddd;
+      padding: 10px 0;
+    }
+    .reply {
+      margin-left: 20px;
+      border-left: 2px solid #eee;
+      padding-left: 10px;
+    }
+    .comment img, .comment video {
+      max-width: 100%;
+      margin-top: 5px;
+      border-radius: 5px;
+    }
+    button {
+      background: #2980b9;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #3498db;
+    }
+  </style>
 </head>
 <body>
-
-<header>
-  <h1>Bionic Hand 프로젝트</h1>
-  <p>MYOWARE 2.0 센서를 이용해 엄지손가락만 움직이는 의수(로봇손)를 만들고 있습니다.</p>
-  <p>PPT 링크: <a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" target="_blank" rel="noopener noreferrer">발표자료 보기</a></p>
-</header>
-
-<section>
-  <h2>아두이노 코드</h2>
-  <button id="copy-button">코드 복사</button>
-  <pre id="arduino-code" tabindex="0" readonly>
-#include &lt;Servo.h&gt;
+  <header>
+    <h1>Bionic Hand Project</h1>
+    <p><a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" style="color: #ecf0f1; text-decoration: underline;">📎 PPT 링크</a></p>
+  </header>
+  <main>
+    <section>
+      <h2>🔧 Arduino Code</h2>
+      <pre><code>#include &lt;Servo.h&gt;
 
 Servo myServo;
 
@@ -44,50 +85,44 @@ int sensorReadings[averageSampleSize];
 int index = 0;
 long total = 0;
 
-long threshold = 0; // Will be set automatically
-const int hysteresis = 5;  // Reduced hysteresis for sensitivity
-const int thresholdOffset = 15; // Lower offset for more realistic triggering
+long threshold = 0;
+const int hysteresis = 5;
+const int thresholdOffset = 15;
 
 bool isActivated = false;
 int lastServoPosition = 0;
 unsigned long lastToggleTime = 0;
-const unsigned long debounceTime = 500; // Prevent rapid toggling (500ms)
+const unsigned long debounceTime = 500;
 
 void setup() {
   myServo.attach(9);
   Serial.begin(9600);
   myServo.write(0);
-  delay(1000); // Give time for serial monitor to open
+  delay(1000);
 
-  // Initialize readings array
-  for (int i = 0; i < averageSampleSize; i++) {
+  for (int i = 0; i &lt; averageSampleSize; i++) {
     sensorReadings[i] = 0;
   }
 
-  // Pre-fill the readings buffer with actual values
   Serial.println("Pre-filling readings buffer...");
-  for (int i = 0; i < averageSampleSize; i++) {
+  for (int i = 0; i &lt; averageSampleSize; i++) {
     int val = analogRead(sensorPin);
     sensorReadings[i] = val;
     total += val;
     delay(20);
   }
 
-  // Calibration mode
   Serial.println("CALIBRATION: Relax your muscle for 5 seconds...");
   long sum = 0;
   int maxVal = 0;
   int minVal = 1023;
   const int calibrationSamples = 100;
 
-  // Collect samples
-  for (int i = 0; i < calibrationSamples; i++) {
+  for (int i = 0; i &lt; calibrationSamples; i++) {
     int val = analogRead(sensorPin);
     sum += val;
     maxVal = max(maxVal, val);
     minVal = min(minVal, val);
-
-    // Print every 10th reading for monitoring
     if (i % 10 == 0) {
       Serial.print("Sample ");
       Serial.print(i);
@@ -100,7 +135,6 @@ void setup() {
   long baseline = sum / calibrationSamples;
   int variance = maxVal - minVal;
 
-  // Set threshold based on baseline and variance
   threshold = baseline + thresholdOffset;
 
   Serial.println("\n--- Calibration Results ---");
@@ -119,10 +153,8 @@ void setup() {
 }
 
 void loop() {
-  // Read new value
   int newValue = analogRead(sensorPin);
 
-  // Update moving average
   total -= sensorReadings[index];
   sensorReadings[index] = newValue;
   total += sensorReadings[index];
@@ -130,7 +162,6 @@ void loop() {
 
   int avgValue = total / averageSampleSize;
 
-  // Print raw and average values for debugging
   Serial.print("Raw: ");
   Serial.print(newValue);
   Serial.print(" | Avg: ");
@@ -138,16 +169,15 @@ void loop() {
   Serial.print(" | Threshold: ");
   Serial.print(threshold);
 
-  // Check if sensor is activated
   unsigned long currentTime = millis();
-  if (avgValue > threshold && !isActivated && (currentTime - lastToggleTime > debounceTime)) {
+  if (avgValue &gt; threshold &amp;&amp; !isActivated &amp;&amp; (currentTime - lastToggleTime &gt; debounceTime)) {
     toggleServo();
     isActivated = true;
     lastToggleTime = currentTime;
     Serial.print(" | ACTIVATED!");
   }
 
-  if (avgValue < (threshold - hysteresis)) {
+  if (avgValue &lt; (threshold - hysteresis)) {
     isActivated = false;
   }
 
@@ -157,170 +187,91 @@ void loop() {
 
 void toggleServo() {
   int target = (lastServoPosition == 0) ? 180 : 0;
-
-  // Move servo smoothly
-  int step = (target > lastServoPosition) ? 5 : -5;
+  int step = (target &gt; lastServoPosition) ? 5 : -5;
   for (int pos = lastServoPosition; pos != target; pos += step) {
     myServo.write(pos);
     delay(15);
   }
-
   myServo.write(target);
   lastServoPosition = target;
-
   Serial.print("Servo toggled to: ");
   Serial.println(target);
 }
-  </pre>
-</section>
+</code></pre>
+    </section>
 
-<section class="comments">
-  <h2>댓글</h2>
+    <section>
+      <h2>🗨️ Leave a Comment</h2>
+      <div id="comment-section"></div>
+      <textarea id="comment-input" placeholder="Write a comment..."></textarea>
+      <input type="file" id="media-input" multiple accept="image/*,video/*">
+      <button onclick="addComment()">Post Comment</button>
+    </section>
+  </main>
+  <script>
+    function createMediaElements(files) {
+      const mediaElements = [];
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        if (file.type.startsWith('image')) {
+          mediaElements.push(`<img src="${url}" alt="uploaded image">`);
+        } else if (file.type.startsWith('video')) {
+          mediaElements.push(`<video controls src="${url}"></video>`);
+        }
+      }
+      return mediaElements.join('');
+    }
 
-  <div id="comments-container"></div>
+    function addComment(parentId = null) {
+      const input = document.getElementById('comment-input');
+      const mediaInput = document.getElementById('media-input');
+      const commentText = input.value.trim();
+      const files = mediaInput.files;
+      if (!commentText && files.length === 0) return;
 
-  <form id="comment-form">
-    <input type="text" id="comment-author" placeholder="이름" required />
-    <textarea id="comment-text" placeholder="댓글을 입력하세요" required></textarea>
-    <button type="submit">댓글 작성</button>
-  </form>
-</section>
+      const commentBox = document.createElement('div');
+      commentBox.className = parentId ? 'comment reply' : 'comment';
 
-<script>
-  // 복사 버튼 이벤트
-  document.getElementById('copy-button').addEventListener('click', () => {
-    const code = document.getElementById('arduino-code').innerText;
-    navigator.clipboard.writeText(code).then(() => {
-      alert('아두이노 코드가 복사되었습니다!');
-    }).catch(() => {
-      alert('복사에 실패했습니다. 직접 선택하여 복사해주세요.');
-    });
-  });
+      const mediaHTML = createMediaElements(files);
+      commentBox.innerHTML = `<p>${commentText}</p>${mediaHTML}<button onclick="deleteComment(this)">Delete</button><button onclick="replyTo(this)">Reply</button>`;
 
-  // 댓글 데이터 구조
-  let comments = JSON.parse(localStorage.getItem('bionicComments') || '[]');
-
-  const commentsContainer = document.getElementById('comments-container');
-  const form = document.getElementById('comment-form');
-  const authorInput = document.getElementById('comment-author');
-  const textInput = document.getElementById('comment-text');
-
-  // 댓글 렌더링 함수
-  function renderComments() {
-    commentsContainer.innerHTML = '';
-    comments.forEach((comment, idx) => {
-      const div = document.createElement('div');
-      div.className = 'comment';
-      div.dataset.idx = idx;
-
-      let repliesHtml = '';
-      if (comment.replies) {
-        comment.replies.forEach((reply, rIdx) => {
-          repliesHtml += `
-            <div class="reply" data-ridx="${rIdx}">
-              <div class="comment-header">${escapeHtml(reply.author)}</div>
-              <div class="comment-content">${escapeHtml(reply.text)}</div>
-              <button onclick="deleteReply(${idx}, ${rIdx})">삭제</button>
-            </div>
-          `;
-        });
+      if (parentId) {
+        parentId.appendChild(commentBox);
+      } else {
+        document.getElementById('comment-section').appendChild(commentBox);
       }
 
-      div.innerHTML = `
-        <div class="comment-header">${escapeHtml(comment.author)}</div>
-        <div class="comment-content">${escapeHtml(comment.text)}</div>
-        <button onclick="deleteComment(${idx})">삭제</button>
-        <button onclick="showReplyForm(${idx}, this)">답글</button>
-        <div class="replies">${repliesHtml}</div>
-      `;
-
-      commentsContainer.appendChild(div);
-    });
-  }
-
-  // 댓글 삭제
-  function deleteComment(index) {
-    if (confirm('댓글을 삭제하시겠습니까?')) {
-      comments.splice(index, 1);
-      saveComments();
-      renderComments();
+      input.value = '';
+      mediaInput.value = '';
     }
-  }
 
-  // 답글 삭제
-  function deleteReply(commentIdx, replyIdx) {
-    if (confirm('답글을 삭제하시겠습니까?')) {
-      comments[commentIdx].replies.splice(replyIdx, 1);
-      if (comments[commentIdx].replies.length === 0) {
-        delete comments[commentIdx].replies;
-      }
-      saveComments();
-      renderComments();
+    function replyTo(btn) {
+      const parentComment = btn.parentElement;
+      const replyInput = document.createElement('textarea');
+      const replyMedia = document.createElement('input');
+      replyMedia.type = 'file';
+      replyMedia.multiple = true;
+      replyMedia.accept = 'image/*,video/*';
+      const replyBtn = document.createElement('button');
+      replyBtn.textContent = 'Post Reply';
+      replyBtn.onclick = () => {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = replyInput.value;
+        document.body.appendChild(tempInput);
+        const mediaFakeInput = document.createElement('input');
+        mediaFakeInput.files = replyMedia.files;
+        addComment(parentComment);
+        document.body.removeChild(tempInput);
+      };
+      parentComment.appendChild(replyInput);
+      parentComment.appendChild(replyMedia);
+      parentComment.appendChild(replyBtn);
+      btn.disabled = true;
     }
-  }
 
-  // 답글 입력 폼 표시
-  function showReplyForm(commentIdx, btn) {
-    // 이미 열려있으면 닫기
-    const existingForm = document.querySelector('.reply-form');
-    if (existingForm) existingForm.remove();
-
-    const formDiv = document.createElement('div');
-    formDiv.className = 'reply-form';
-    formDiv.innerHTML = `
-      <input type="text" placeholder="이름" id="reply-author" required />
-      <textarea placeholder="답글을 입력하세요" id="reply-text" required></textarea>
-      <button>답글 작성</button>
-    `;
-
-    btn.parentNode.appendChild(formDiv);
-
-    const replyAuthor = formDiv.querySelector('#reply-author');
-    const replyText = formDiv.querySelector('#reply-text');
-    const replyBtn = formDiv.querySelector('button');
-
-    replyBtn.onclick = function () {
-      if (!replyAuthor.value.trim() || !replyText.value.trim()) {
-        alert('이름과 내용을 모두 입력하세요.');
-        return;
-      }
-      addReply(commentIdx, replyAuthor.value.trim(), replyText.value.trim());
-      formDiv.remove();
-    };
-  }
-
-  // 답글 추가
-  function addReply(commentIdx, author, text) {
-    if (!comments[commentIdx].replies) {
-      comments[commentIdx].replies = [];
+    function deleteComment(btn) {
+      btn.parentElement.remove();
     }
-    comments[commentIdx].replies.push({ author, text });
-    saveComments();
-    renderComments();
-  }
-
-  // 댓글 저장
-  function saveComments() {
-    localStorage.setItem('bionicComments', JSON.stringify(comments));
-  }
-
-  // 댓글 작성 이벤트
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const author = authorInput.value.trim();
-    const text = textInput.value.trim();
-    if (!author || !text) {
-      alert('이름과 댓글 내용을 입력하세요.');
-      return;
-    }
-    comments.push({ author, text });
-    saveComments();
-    renderComments();
-    form.reset();
-  });
-
-  // HTML 특수문자 이스케이프
-  function escapeHtml(text) {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
+  </script>
+</body>
+</html>
