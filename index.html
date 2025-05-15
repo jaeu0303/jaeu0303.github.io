@@ -3,189 +3,331 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bionic Hand 프로젝트</title>
+  <title>Bionic Hand 프로젝트 블로그</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0; padding: 0;
+      font-family: 'Arial', sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f9f9f9;
       color: #333;
     }
     header {
-      background: #006666;
-      color: white;
-      padding: 2rem;
-      text-align: center;
+      border-bottom: 2px solid #4CAF50;
+      margin-bottom: 20px;
     }
-    .container {
-      max-width: 800px;
-      margin: 2rem auto;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      border-bottom: 2px solid #eee;
-      padding-bottom: 0.3rem;
-    }
-    pre {
-      background: #f0f0f0;
-      padding: 1rem;
-      overflow-x: auto;
-      border-radius: 5px;
-    }
-    code {
-      font-family: monospace;
-    }
-    .comment-form input,
-    .comment-form textarea {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    .comment-form button {
-      background: #006666;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .comment-list {
-      margin-top: 1rem;
-    }
-    .comment-item {
-      padding: 0.5rem;
-      border-bottom: 1px solid #eee;
-    }
-    .reply-box {
-      margin-left: 1.5rem;
-      padding-left: 1rem;
-      border-left: 2px solid #ddd;
-      margin-top: 0.5rem;
-    }
-    .reply-button,
-    .delete-button {
-      font-size: 0.9rem;
-      color: #006666;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0 0.3rem;
+    h1 {
+      color: #4CAF50;
     }
     a {
-      color: #006666;
+      color: #2196F3;
       text-decoration: none;
     }
     a:hover {
       text-decoration: underline;
     }
-    img, iframe {
-      max-width: 100%;
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 15px;
+      overflow-x: auto;
       border-radius: 5px;
-      margin-top: 0.3rem;
+      white-space: pre-wrap;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
     }
-    iframe {
-      aspect-ratio: 16/9;
+    button.copy-btn {
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
     }
-    .media-label {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 0.2rem;
+    button.copy-btn:hover {
+      background: #45a049;
+    }
+    section.comments {
+      margin-top: 40px;
+    }
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 5px;
+    }
+    .comment-form textarea {
+      width: 100%;
+      height: 80px;
+      resize: vertical;
+      padding: 8px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .comment-form button {
+      background: #4CAF50;
+      border: none;
+      padding: 8px 16px;
+      color: white;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .comment-form button:hover {
+      background: #45a049;
+    }
+    .comment-list {
+      margin-top: 20px;
+      list-style: none;
+      padding: 0;
+    }
+    .comment-item {
+      background: white;
+      border-radius: 5px;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .comment-item button.delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: #f44336;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .comment-item button.delete-btn:hover {
+      background: #d32f2f;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Bionic Hand 프로젝트</h1>
-    <p>MYOWARE 2.0을 이용한 엄지 근전도 제어 의수</p>
-    <p><a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" target="_blank">📊 프로젝트 PPT 보기</a></p>
+    <p>우리 프로젝트는 근전도 센서를 활용한 의수 제어 시스템입니다.</p>
+    <p>PPT 링크: <a href="https://gamma.app/docs/EMG--fxp1jqdan0hg2tt" target="_blank" rel="noopener noreferrer">발표자료 보기</a></p>
   </header>
 
-  <div class="container">
+  <section>
     <h2>아두이노 코드</h2>
-    <pre><code>#include &lt;Servo.h&gt;
+    <pre id="arduino-code" readonly>
+#include &lt;Servo.h&gt;
 
 Servo myServo;
+
 const int sensorPin = A0;
 const int averageSampleSize = 10;
 int sensorReadings[averageSampleSize];
 int index = 0;
 long total = 0;
-long threshold = 0;
-const int hysteresis = 5;
-const int thresholdOffset = 15;
+
+long threshold = 0; // Will be set automatically
+const int hysteresis = 5;  // Reduced hysteresis for sensitivity
+const int thresholdOffset = 15; // Lower offset for more realistic triggering
+
 bool isActivated = false;
 int lastServoPosition = 0;
 unsigned long lastToggleTime = 0;
-const unsigned long debounceTime = 500;
+const unsigned long debounceTime = 500; // Prevent rapid toggling (500ms)
 
 void setup() {
   myServo.attach(9);
   Serial.begin(9600);
   myServo.write(0);
-  delay(1000);
-  for (int i = 0; i &lt; averageSampleSize; i++) sensorReadings[i] = 0;
+  delay(1000); // Give time for serial monitor to open
+ 
+  // Initialize readings array
+  for (int i = 0; i &lt; averageSampleSize; i++) {
+    sensorReadings[i] = 0;
+  }
+
+  // Pre-fill the readings buffer with actual values
+  Serial.println("Pre-filling readings buffer...");
   for (int i = 0; i &lt; averageSampleSize; i++) {
     int val = analogRead(sensorPin);
     sensorReadings[i] = val;
     total += val;
     delay(20);
   }
+ 
+  // Calibration mode
   Serial.println("CALIBRATION: Relax your muscle for 5 seconds...");
   long sum = 0;
-  int maxVal = 0, minVal = 1023;
-  for (int i = 0; i &lt; 100; i++) {
+  int maxVal = 0;
+  int minVal = 1023;
+  const int calibrationSamples = 100;
+ 
+  // Collect samples
+  for (int i = 0; i &lt; calibrationSamples; i++) {
     int val = analogRead(sensorPin);
     sum += val;
     maxVal = max(maxVal, val);
     minVal = min(minVal, val);
-    if (i % 10 == 0) Serial.println(val);
+   
+    // Print every 10th reading for monitoring
+    if (i % 10 == 0) {
+      Serial.print("Sample ");
+      Serial.print(i);
+      Serial.print(": ");
+      Serial.println(val);
+    }
     delay(50);
   }
-  long baseline = sum / 100;
+ 
+  long baseline = sum / calibrationSamples;
   int variance = maxVal - minVal;
+ 
+  // Set threshold based on baseline and variance
   threshold = baseline + thresholdOffset;
-  Serial.println("Threshold set to: " + String(threshold));
+ 
+  Serial.println("\n--- Calibration Results ---");
+  Serial.print("Min value: ");
+  Serial.println(minVal);
+  Serial.print("Max value: ");
+  Serial.println(maxVal);
+  Serial.print("Baseline: ");
+  Serial.println(baseline);
+  Serial.print("Variance: ");
+  Serial.println(variance);
+  Serial.print("Threshold set to: ");
+  Serial.println(threshold);
+  Serial.println("-------------------------");
+  Serial.println("Now flex your muscle to test!");
 }
 
 void loop() {
+  // Read new value
   int newValue = analogRead(sensorPin);
+
+  // Update moving average
   total -= sensorReadings[index];
   sensorReadings[index] = newValue;
   total += sensorReadings[index];
   index = (index + 1) % averageSampleSize;
+
   int avgValue = total / averageSampleSize;
+
+  // Print raw and average values for debugging
+  Serial.print("Raw: ");
+  Serial.print(newValue);
+  Serial.print(" | Avg: ");
+  Serial.print(avgValue);
+  Serial.print(" | Threshold: ");
+  Serial.print(threshold);
+ 
+  // Check if sensor is activated
   unsigned long currentTime = millis();
-  if (avgValue &gt; threshold &amp;&amp; !isActivated &amp;&amp; (currentTime - lastToggleTime &gt; debounceTime)) {
+  if (avgValue &gt; threshold && !isActivated && (currentTime - lastToggleTime &gt; debounceTime)) {
     toggleServo();
     isActivated = true;
     lastToggleTime = currentTime;
+    Serial.print(" | ACTIVATED!");
   }
+ 
   if (avgValue &lt; (threshold - hysteresis)) {
     isActivated = false;
   }
+ 
+  Serial.println();
   delay(50);
 }
 
 void toggleServo() {
   int target = (lastServoPosition == 0) ? 180 : 0;
+
+  // Move servo smoothly
   int step = (target &gt; lastServoPosition) ? 5 : -5;
   for (int pos = lastServoPosition; pos != target; pos += step) {
     myServo.write(pos);
     delay(15);
   }
+
   myServo.write(target);
   lastServoPosition = target;
-  Serial.println("Servo toggled to: " + String(target));
-}</code></pre>
-  </div>
 
-  <!-- 댓글 시스템은 이전 코드 그대로 하단에 유지됨 -->
-  <!-- 생략된 부분은 이어서 복사해서 붙이시면 됩니다. 필요 시 전체 복사도 가능해요. -->
+  Serial.print("Servo toggled to: ");
+  Serial.println(target);
+}
+    </pre>
+    <button class="copy-btn" onclick="copyCode()">코드 복사하기</button>
+  </section>
+
+  <section class="comments">
+    <h2>리뷰 및 답글</h2>
+    <form class="comment-form" onsubmit="return addComment();">
+      <textarea id="comment-input" placeholder="댓글을 작성하세요..." required></textarea>
+      <br />
+      <button type="submit">댓글 남기기</button>
+    </form>
+    <ul class="comment-list" id="comment-list"></ul>
+  </section>
+
+  <script>
+    // 코드 복사 함수
+    function copyCode() {
+      const code = document.getElementById('arduino-code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('코드가 복사되었습니다!');
+      });
+    }
+
+    // 로컬 스토리지에서 댓글 불러오기
+    function loadComments() {
+      const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+      const list = document.getElementById('comment-list');
+      list.innerHTML = '';
+      comments.forEach((c, i) => {
+        const li = document.createElement('li');
+        li.className = 'comment-item';
+        li.innerHTML = `
+          <div>${escapeHtml(c.text).replace(/\n/g, '<br>')}</div>
+          <button class="delete-btn" onclick="deleteComment(${i})">삭제</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // HTML 이스케이프 함수 (XSS 방지)
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m];
+      });
+    }
+
+    // 댓글 추가
+    function addComment() {
+      const input = document.getElementById('comment-input');
+      let text = input.value.trim();
+      if (!text) return false;
+      const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+      comments.push({ text });
+      localStorage.setItem('comments', JSON.stringify(comments));
+      input.value = '';
+      loadComments();
+      return false;
+    }
+
+    // 댓글 삭제
+    function deleteComment(index) {
+      const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+      comments.splice(index, 1);
+      localStorage.setItem('comments', JSON.stringify(comments));
+      loadComments();
+    }
+
+    // 페이지 로드 시 댓글 불러오기
+    window.onload = loadComments;
+  </script>
 </body>
 </html>
