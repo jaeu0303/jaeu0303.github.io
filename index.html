@@ -9,12 +9,12 @@
       font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f6f8;
+      background-color: #f8f8f8;
       color: #333;
     }
 
     header {
-      background-color: #006666;
+      background-color: #004080;
       color: white;
       padding: 2rem;
       text-align: center;
@@ -23,7 +23,7 @@
     .container {
       max-width: 800px;
       margin: 2rem auto;
-      padding: 1.5rem;
+      padding: 1rem;
       background-color: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -43,6 +43,8 @@
       padding: 1rem;
       overflow-x: auto;
       border-radius: 5px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
 
     .comment-form {
@@ -56,15 +58,18 @@
       margin: 0.5rem 0;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 1rem;
     }
 
     .comment-form button {
-      background-color: #006666;
+      background-color: #004080;
       color: white;
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 1rem;
     }
 
     .comment-list {
@@ -78,20 +83,24 @@
 
     .reply-box {
       margin-left: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+      padding: 0.3rem 0;
     }
 
     .reply-button,
     .delete-button {
       font-size: 0.9rem;
-      color: #006666;
+      color: #004080;
       background: none;
       border: none;
       cursor: pointer;
       padding: 0 0.3rem;
+      margin-left: 0.5rem;
     }
 
     a {
-      color: #006666;
+      color: #004080;
       text-decoration: none;
     }
 
@@ -143,7 +152,8 @@ void loop() {
     digitalWrite(9, LOW);
   }
   delay(100);
-}</code></pre>
+}
+    </code></pre>
 
     <h2>피드백 남기기 💬</h2>
     <form class="comment-form" onsubmit="addReview(event)">
@@ -158,37 +168,45 @@ void loop() {
   </div>
 
   <script>
+    // 로컬스토리지에서 댓글 불러오기
     let comments = JSON.parse(localStorage.getItem("bionicComments") || "[]");
 
+    // 댓글 저장 함수
     function saveComments() {
       localStorage.setItem("bionicComments", JSON.stringify(comments));
     }
 
+    // 댓글 화면 렌더링 함수
     function renderComments() {
       const list = document.getElementById("commentList");
       list.innerHTML = "";
       comments.forEach((c, i) => {
         const item = document.createElement("div");
         item.className = "comment-item";
-        item.innerHTML = `<strong>${c.name}</strong>: ${c.text}<br>`;
 
+        // 댓글 작성자 및 내용
+        item.innerHTML = `<strong>${escapeHTML(c.name)}</strong>: ${escapeHTML(c.text)}<br>`;
+
+        // 답글 버튼
         const replyBtn = document.createElement("button");
         replyBtn.className = "reply-button";
         replyBtn.textContent = "답글 달기";
         replyBtn.onclick = () => showReplyBox(i);
         item.appendChild(replyBtn);
 
+        // 삭제 버튼
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "delete-button";
         deleteBtn.textContent = "삭제";
         deleteBtn.onclick = () => deleteComment(i);
         item.appendChild(deleteBtn);
 
+        // 답글 표시
         if (c.replies && c.replies.length > 0) {
           c.replies.forEach(r => {
             const replyDiv = document.createElement("div");
             replyDiv.className = "reply-box";
-            replyDiv.textContent = `${r.name}: ${r.text}`;
+            replyDiv.textContent = `${escapeHTML(r.name)}: ${escapeHTML(r.text)}`;
             item.appendChild(replyDiv);
           });
         }
@@ -197,6 +215,7 @@ void loop() {
       });
     }
 
+    // 리뷰 추가 함수
     function addReview(event) {
       event.preventDefault();
       const name = document.getElementById("nameInput").value.trim();
@@ -210,6 +229,7 @@ void loop() {
       }
     }
 
+    // 답글 입력창 표시 및 저장 함수
     function showReplyBox(index) {
       const name = prompt("이름을 입력하세요:");
       const reply = prompt("답글 내용을 입력하세요:");
@@ -220,12 +240,27 @@ void loop() {
       }
     }
 
+    // 댓글 삭제 함수
     function deleteComment(index) {
       if (confirm("정말 이 댓글을 삭제하시겠습니까?")) {
         comments.splice(index, 1);
         saveComments();
         renderComments();
       }
+    }
+
+    // XSS 방지용 HTML 이스케이프 함수
+    function escapeHTML(text) {
+      return text.replace(/[&<>"']/g, function(match) {
+        const escape = {
+          '&': "&amp;",
+          '<': "&lt;",
+          '>': "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        };
+        return escape[match];
+      });
     }
 
     renderComments();
